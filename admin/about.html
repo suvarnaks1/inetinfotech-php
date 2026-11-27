@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>About | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="about.html" data-title="About"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET /api/about | PUT /api/about. JSON: hero, say, tiles[], what{title,p,items[]}, why{title,p,items[]} -->
+<div class="ph"><div><i class="dash"></i><h2>About</h2><p>The text on the About page: intro, mission, vision, goal and the two fact lists. Press Save changes when you are done.</p></div></div>
+<div id="banner"></div>
+<div class="panel"><h3>Introduction</h3><div class="pb"><div class="g3"><label>Statement, start<input data-b="say.a"></label><label>Highlighted word<input data-b="say.b"></label><label>Statement, end<input data-b="say.c"></label></div><label>Paragraph<textarea data-b="say.p" rows="4"></textarea></label></div></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">Mission, vision and goal</span><button class="btn ghost" data-add="tiles" type="button"><i class="fa-solid fa-plus"></i>Add card</button></div><div class="pb"><div id="tiles"></div></div></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">“What we do” section</span><button class="btn ghost" data-add="what" type="button"><i class="fa-solid fa-plus"></i>Add item</button></div><div class="pb"><div class="g2"><label>Heading<input data-b="what.title"></label><label>Sub text<input data-b="what.p"></label></div><div id="what"></div></div></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">“Why I-Net” section</span><button class="btn ghost" data-add="why" type="button"><i class="fa-solid fa-plus"></i>Add item</button></div><div class="pb"><div class="g2"><label>Heading<input data-b="why.title"></label><label>Sub text<input data-b="why.p"></label></div><div id="why"></div></div></div>
+<div class="savebar"><button class="btn" id="save">Save changes</button></div>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="js/admin.js"></script>
+<script>
+const A=load('about');$('#banner').innerHTML=BANNER();bindB(A);
+const F=[{k:'icon',l:'Icon <small>(Font Awesome class)</small>',w:'w2'},{k:'t',l:'Title',w:'w4'},{k:'d',l:'Description',a:1}],B={icon:'fa-solid fa-star',t:'',d:''};
+rep('tiles',A.tiles,F,B);rep('what',A.what.items,F,B);rep('why',A.why.items,F,B);
+$('#save').onclick=()=>{Store.set('about',A);toast('About page saved')};
+</script></body></html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Placements | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="placements.html" data-title="Placements"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET/POST /api/placements/photos (multipart upload), PUT/DELETE /api/placements/photos/:id, GET/PUT /api/pcontent (hero + dome heading) -->
+<div class="ph"><div><i class="dash"></i><h2>Placements</h2><p>Manage the placed-student photo dome and the text on the Placements page. The same photos also form the faces strip on the home page.</p></div></div>
+<div class="tabs" role="tablist"><button class="on" data-t="photos" role="tab">Placed student photos</button><button data-t="content" role="tab">Page text</button></div>
+<section id="photos"><label class="drop" id="drop"><i class="fa-solid fa-cloud-arrow-up" style="font-size:1.6rem"></i><b>Drop photos here or choose files</b><span>JPG or PNG. Square photos of the face work best.</span><input type="file" id="up" accept="image/*" multiple hidden></label><div class="tiles" id="tiles"></div></section>
+<section id="content" hidden><div id="banner"></div>
+<div class="panel"><h3>Photo dome heading</h3><div class="pb"><div class="g2"><label>Heading, first words<input data-b="dome.a"></label><label>Heading, highlighted word<input data-b="dome.b"></label></div><div class="g2"><label>Text under the heading<input data-b="dome.lead"></label><label>Small hint on the right<input data-b="dome.hint"></label></div></div></div>
+<div class="savebar"><button class="btn" id="saveC">Save changes</button></div></section>
+<aside class="dr sm" id="dr" aria-label="Photo details"><header><h3>Photo details</h3><button class="ib" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button></header>
+<div class="bd2"><form onsubmit="return false"><img id="big" alt="" style="width:100%;max-height:280px;object-fit:cover;margin-bottom:16px"><label>Student name<input id="f-name"></label><div class="g2"><label>Company<input id="f-company"></label><label>Role<input id="f-role"></label></div><label>Course<input id="f-course"></label><label class="sw"><input type="checkbox" id="f-show"> Show on the website</label></form></div>
+<footer><button class="btn danger" id="del" type="button">Delete photo</button><span><button class="btn ghost" data-close type="button">Cancel</button> <button class="btn" id="save" type="button">Save</button></span></footer></aside>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="js/admin.js"></script>
+<script>
+let S=Store.get('students',null)||SEED.students.map((f,i)=>({id:'s'+i,img:f,name:'Placed student '+(i+1),company:'',role:'',course:'',show:true})),cur=null;
+const P=load('pcontent');$('#banner').innerHTML=BANNER();bindB(P);
+const draw=()=>$('#tiles').innerHTML=S.map(s=>`<button class="tile${s.show?'':' off'}" data-e="${s.id}"><img src="${asset(s.img)}" alt="${esc(s.name)}" loading="lazy">${s.show?'':'<b class="hid">Hidden</b>'}<span>${esc(s.name)}</span></button>`).join('')||'<p class="empty">No photos yet. Drop some above.</p>';
+const add=async fs=>{let n=0;for(const f of fs){const u=await readFile(f);if(!u)continue;n++;S.push({id:'s'+Date.now()+Math.random().toString(36).slice(2,5),img:u,name:f.name.replace(/\.[^.]+$/,''),company:'',role:'',course:'',show:true})}if(n){Store.set('students',S);draw();toast(n+' photo(s) added')}};
+$('#up').onchange=e=>add([...e.target.files]);const dz=$('#drop');
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('over')};dz.ondragleave=()=>dz.classList.remove('over');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('over');add([...e.dataTransfer.files].filter(f=>f.type.startsWith('image/')))};
+$('#tiles').onclick=e=>{const b=e.target.closest('[data-e]');if(!b)return;cur=S.find(s=>s.id===b.dataset.e);$('#big').src=asset(cur.img);for(const k of ['name','company','role','course'])$('#f-'+k).value=cur[k]||'';$('#f-show').checked=cur.show;openDr('dr')};
+$('#save').onclick=()=>{for(const k of ['name','company','role','course'])cur[k]=$('#f-'+k).value.trim();cur.show=$('#f-show').checked;Store.set('students',S);draw();closeDr();toast('Photo saved')};
+$('#del').onclick=()=>{if(confirm('Delete this photo? This cannot be undone.')){S=S.filter(s=>s!==cur);Store.set('students',S);draw();closeDr();toast('Photo deleted')}};
+$$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));$('#photos').hidden=b.dataset.t!=='photos';$('#content').hidden=b.dataset.t!=='content'});
+$('#saveC').onclick=()=>{Store.set('pcontent',P);toast('Placement content saved')};draw();
+</script></body></html>

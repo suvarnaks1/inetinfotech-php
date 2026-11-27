@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="index.html" data-title="Dashboard"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<div class="ph"><div><i class="dash"></i><h2>Welcome back</h2><p>See what is live on the website and jump to the content you want to change.</p></div></div>
+<div class="strip" id="strip"></div>
+<div class="panel"><h3>Edit website content</h3><div class="qa">
+<a href="home-content.html"><i class="fa-solid fa-house"></i>Home page</a><a href="about.html"><i class="fa-solid fa-circle-info"></i>About page</a><a href="courses.html"><i class="fa-solid fa-graduation-cap"></i>Add or edit a course</a><a href="services.html"><i class="fa-solid fa-screwdriver-wrench"></i>Add or edit a service</a><a href="placements.html"><i class="fa-solid fa-user-tie"></i>Upload placement photos</a><a href="gallery.html"><i class="fa-solid fa-images"></i>Gallery pictures</a><a href="certifications.html"><i class="fa-solid fa-award"></i>Certification logos</a><a href="contact.html"><i class="fa-solid fa-phone"></i>Contact &amp; footer</a></div></div>
+<div class="panel"><h3>Drafts waiting to be published</h3><div class="pb" id="drafts"></div></div>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="../js/courses-data.js"></script><script>SEED.courses=COURSES_DEFAULT</script><script src="js/admin.js"></script>
+<script>
+const C=Store.get('courses',SEED.courses),S=Store.get('students',SEED.students),K=Store.get('certs',SEED.certs),V=load('services').list,G=load('gallery').items;
+$('#strip').innerHTML=[['courses.html',C.length,'Courses'],['services.html',V.length,'Services'],['placements.html',S.length,'Placement photos'],['gallery.html',G.length,'Gallery pictures'],['certifications.html',K.length,'Certification logos']].map(x=>`<a href="${x[0]}"><b>${x[1]}</b><span>${x[2]}</span></a>`).join('');
+const d=[...C.filter(c=>c.status==='draft').map(c=>['Course',c.title,'courses.html']),...K.filter(k=>k.status==='draft').map(k=>['Certification logo',k.title,'certifications.html'])];
+$('#drafts').innerHTML=d.length?d.map(x=>`<p><a href="${x[2]}"><b>${esc(x[1])}</b></a> <span class="mut">${x[0]}</span></p>`).join(''):'<p class="mut">Nothing in draft. Everything you add is published unless you choose Draft.</p>';
+</script></body></html>

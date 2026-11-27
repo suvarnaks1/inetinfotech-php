@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Certifications | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="certifications.html" data-title="Certifications"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET /api/certifications | POST /api/certifications | PUT /api/certifications/:id | DELETE /api/certifications/:id | PUT /api/certifications/order.
+     Fields: id, title (also the alt text), img, url, status. List order = order of the logo strip on the home page. -->
+<div class="ph"><div><i class="dash"></i><h2>Certifications</h2><p>The partner and certification logos in the “Our certifications” strip on the home page. Use the arrows to change the order.</p></div><button class="btn" id="add"><i class="fa-solid fa-plus"></i>Add logo</button></div>
+<div class="panel tw"><table class="rt"><thead><tr><th>Logo</th><th>Name</th><th>Link</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+<aside class="dr" id="dr" aria-label="Certification form"><header><h3 id="dt">Add logo</h3><button class="ib" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button></header>
+<div class="bd2"><form id="f" onsubmit="return false"><label>Name <small>(read out for screen readers, e.g. Cisco Learning Partner)</small><input id="f-title" required></label>
+<label>Status<select id="f-status"><option value="published">Published</option><option value="draft">Draft</option></select></label>
+<label>Logo<select id="f-img"></select></label>
+<label>Or upload a new logo<input type="file" id="f-up" accept="image/*"><span class="hint">Large pictures are shrunk automatically in this demo.</span></label>
+<label>Link <small>(optional)</small><input id="f-url" type="url" placeholder="https://"></label></form>
+<div class="pv"><p>Preview of the logo</p><div class="gc" id="pv" style="padding:18px;text-align:center"></div></div></div>
+<footer><button class="btn danger" id="del" type="button">Delete</button><span><button class="btn ghost" data-close type="button">Cancel</button> <button class="btn" id="save" type="button">Save logo</button></span></footer></aside>
+</main></div><script src="js/seed.js"></script><script src="js/admin.js"></script>
+<script>
+let L=Store.get('certs',null)||SEED.certs.map(c=>({...c})),cur=null,up='';
+$('#f-img').innerHTML='<option value="">Choose a logo</option>'+SEED.media.map(m=>`<option>${m}</option>`).join('');
+const draw=()=>{$('#rows').innerHTML=L.map((c,i)=>`<tr><td class="c-img"><span class="th">${c.img?`<img src="${asset(c.img)}" alt="" style="object-fit:contain;background:#fff">`:`<i class="fa-solid fa-certificate"></i>`}</span></td><td class="c-main"><b>${esc(c.title)}</b></td><td class="c-cat">${c.url?esc(c.url):'<span class="mut">None</span>'}</td><td class="c-st"><span class="pill ${c.status}">${c.status==='draft'?'Draft':'Published'}</span></td><td class="act"><span class="ord"><button class="ib" data-m="-1" data-id="${c.id}" aria-label="Move ${esc(c.title)} up"${i===0?' disabled':''}><i class="fa-solid fa-arrow-up"></i></button><button class="ib" data-m="1" data-id="${c.id}" aria-label="Move ${esc(c.title)} down"${i===L.length-1?' disabled':''}><i class="fa-solid fa-arrow-down"></i></button><button class="ib" data-e="${c.id}" aria-label="Edit ${esc(c.title)}"><i class="fa-solid fa-pen"></i></button></span></td></tr>`).join('')||'<tr><td colspan="5" class="empty">No logos yet. Add the first one.</td></tr>'};
+const pv=()=>{const im=up||$('#f-img').value;$('#pv').innerHTML=im?`<img src="${asset(im)}" alt="" style="max-width:100%;max-height:120px;object-fit:contain">`:'<span class="mut">Choose or upload a logo</span>'};
+const open=c=>{cur=c;up='';$('#dt').textContent=c?'Edit logo':'Add logo';$('#del').style.display=c?'':'none';
+const d=c||{status:'published',img:''};for(const k of ['title','status','url'])$('#f-'+k).value=d[k]||(k==='status'?'published':'');
+const s=$('#f-img');if(d.img&&!/^data:/.test(d.img)&&![...s.options].some(o=>o.value===d.img))s.add(new Option(d.img,d.img));s.value=/^data:/.test(d.img)?'':(d.img||'');if(/^data:/.test(d.img))up=d.img;
+$('#f-up').value='';openDr('dr');pv()};
+$('#add').onclick=()=>open(null);
+$('#rows').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
+ if(b.dataset.e)return open(L.find(c=>c.id===b.dataset.e));
+ if(b.dataset.m){const i=L.findIndex(c=>c.id===b.dataset.id),j=i+ +b.dataset.m;if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];Store.set('certs',L);draw();toast('Order saved')}};
+$('#f-up').onchange=async e=>{if(e.target.files[0]){up=await shrink(e.target.files[0]);pv()}};
+$('#f-img').onchange=()=>{up='';pv()};
+$('#save').onclick=()=>{const v=id=>$('#f-'+id).value.trim();if(!v('title')){$('#f-title').focus();return toast('Enter a name first')}
+const d={id:cur?cur.id:'k'+Date.now(),title:v('title'),img:up||v('img'),url:v('url'),status:v('status')};
+cur?L[L.indexOf(cur)]=d:L.push(d);if(Store.set('certs',L)){draw();closeDr();toast('Logo saved')}};
+$('#del').onclick=()=>{if(cur&&confirm('Delete "'+cur.title+'"? This cannot be undone.')){L=L.filter(c=>c!==cur);Store.set('certs',L);draw();closeDr();toast('Logo deleted')}};
+draw();
+</script></body></html>

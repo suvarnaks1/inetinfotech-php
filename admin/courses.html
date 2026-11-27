@@ -1,0 +1,55 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Courses | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="courses.html" data-title="Courses"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET /api/courses | POST /api/courses | PUT /api/courses/:id | DELETE /api/courses/:id. Field names match COURSES_DEFAULT in js/courses-data.js. Page text: GET/PUT /api/coursesPage. -->
+<div class="ph"><div><i class="dash"></i><h2>Courses</h2><p>Every course shown on the Courses page and its details page, plus the page text. Use Draft to hide a course.</p></div><button class="btn" id="add"><i class="fa-solid fa-plus"></i>Add course</button></div>
+<div class="tabs" role="tablist"><button class="on" data-t="list" role="tab">Courses</button><button data-t="text" role="tab">Page text</button></div>
+<section id="list"><div class="tools"><input id="q" type="search" placeholder="Search courses" aria-label="Search courses"><div class="chips" id="chips"></div></div>
+<div class="panel tw"><table class="rt"><thead><tr><th>Image</th><th>Course</th><th>Topic</th><th>Status</th><th></th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section id="text" hidden><div id="banner"></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">“How it works” steps</span><button class="btn ghost" data-add="steps" type="button"><i class="fa-solid fa-plus"></i>Add step</button></div><div class="pb"><div class="g2"><label>Heading<input data-b="how.title"></label><label>Sub text<input data-b="how.p"></label></div><div id="steps"></div></div></div>
+<div class="savebar"><button class="btn" id="saveT">Save page text</button></div></section>
+<aside class="dr" id="dr" aria-label="Course form"><header><h3 id="dt">Add course</h3><button class="ib" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button></header>
+<div class="bd2"><form id="f" onsubmit="return false"><label>Course title<input id="f-title" name="title" required></label>
+<div class="g2"><label>Topic<select id="f-c" name="c"></select></label><label>Small label above title<input id="f-tag" name="tag" placeholder="e.g. Programming"></label></div>
+<div class="g2"><label>Icon <small>(Font Awesome class)</small><input id="f-icon" name="icon" list="ics" placeholder="fa-solid fa-code"></label><label>Status<select id="f-status" name="status"><option value="published">Published</option><option value="draft">Draft</option></select></label></div>
+<datalist id="ics"><option value="fa-solid fa-code"><option value="fa-solid fa-cloud"><option value="fa-solid fa-shield-halved"><option value="fa-solid fa-brain"><option value="fa-solid fa-network-wired"><option value="fa-brands fa-python"><option value="fa-brands fa-java"><option value="fa-solid fa-chart-column"></datalist>
+<label>Image <small>(optional, the icon shows when empty)</small><select id="f-img" name="img"></select></label>
+<label>Or upload a new image<input type="file" id="f-up" accept="image/*"></label>
+<div class="g3"><label>Focus<select id="f-pos" name="pos"><option>center</option><option>center 0%</option><option>center 12%</option><option>center 40%</option><option>center 78%</option></select></label><label>Fit<select id="f-fit" name="fit"><option>cover</option><option>contain</option></select></label><label>Alt text<input id="f-alt" name="alt"></label></div>
+<label>Short description <small>(shown on the course card and at the top of the details page)</small><textarea id="f-desc" name="desc"></textarea></label><label>Card highlights<input id="f-meta" name="meta" placeholder="4 months · Live projects"></label>
+<h4 class="fs">Details page: fees and facts</h4>
+<div class="g2"><label>Course fee<input id="f-fee" name="fee" placeholder="e.g. ₹25,000"><span class="hint">Leave empty to show “Call for fees”.</span></label><label>Fee note<input id="f-feeNote" name="feeNote" placeholder="e.g. Instalments available"></label></div>
+<div class="g3"><label>Duration<input id="f-duration" name="duration" placeholder="e.g. 4 months"></label><label>Level<input id="f-level" name="level" list="lvl" placeholder="e.g. Beginner"></label><label>Mode<input id="f-mode" name="mode" list="mod" placeholder="e.g. Classroom"></label></div>
+<datalist id="lvl"><option value="Beginner"><option value="Intermediate"><option value="Advanced"><option value="Beginner to advanced"></datalist><datalist id="mod"><option value="Classroom"><option value="Online"><option value="Classroom and online"></datalist>
+<div class="g2"><label>Batch timing<input id="f-batch" name="batch" placeholder="e.g. Weekdays and weekends"></label><label>Certification<input id="f-certification" name="certification" placeholder="e.g. Course certificate"></label></div>
+<label>Who can join<textarea id="f-eligibility" name="eligibility" placeholder="e.g. Plus Two or above. No prior experience needed."></textarea></label>
+<label>What you will learn <small>(one topic per line)</small><textarea id="f-topics" name="topics" rows="6"></textarea></label>
+<label>Career outcomes <small>(one per line, optional)</small><textarea id="f-outcomes" name="outcomes" rows="4"></textarea></label></form>
+<div class="pv"><p>Preview of the course card</p><div class="gc" id="pv"></div></div></div>
+<footer><button class="btn danger" id="del" type="button">Delete</button><span><button class="btn ghost" data-close type="button">Cancel</button> <button class="btn" id="save" type="button">Save course</button></span></footer></aside>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="../js/courses-data.js"></script><script src="js/admin.js"></script>
+<script>
+const CATS={net:'Networking',ops:'Cloud & Security',web:'Web & Digital',code:'Programming',data:'Data & AI',car:'Careers'};
+let L=Store.get('courses',null)||COURSES_DEFAULT.map(c=>({...c,status:'published'})),cat='all',q='',cur=null,up='';
+$('#f-c').innerHTML=Object.entries(CATS).map(e=>`<option value="${e[0]}">${e[1]}</option>`).join('');
+$('#f-img').innerHTML='<option value="">No image (use icon)</option>'+SEED.media.map(m=>`<option>${m}</option>`).join('');
+$('#chips').innerHTML=[['all','All'],...Object.entries(CATS)].map(e=>`<button data-k="${e[0]}" class="${e[0]==='all'?'on':''}">${e[1]}</button>`).join('');
+const draw=()=>{const r=L.filter(c=>(cat==='all'||c.c===cat)&&(c.title+c.tag).toLowerCase().includes(q));
+$('#rows').innerHTML=r.map(c=>`<tr><td class="c-img"><span class="th">${c.img?`<img src="${asset(c.img)}" alt="">`:`<i class="${esc(c.icon)}"></i>`}</span></td><td class="c-main"><b>${esc(c.title)}</b><div class="mut">${esc(c.meta)}${c.fee?' · Fee: '+esc(c.fee):' · No fee set'}</div></td><td class="c-cat">${CATS[c.c]}</td><td class="c-st"><span class="pill ${c.status}">${c.status==='draft'?'Draft':'Published'}</span></td><td class="act"><a class="ib" href="../course.html?id=${encodeURIComponent(c.id)}" target="_blank" rel="noopener" aria-label="View ${esc(c.title)} on the site"><i class="fa-solid fa-arrow-up-right-from-square"></i></a> <button class="ib" data-e="${c.id}" aria-label="Edit ${esc(c.title)}"><i class="fa-solid fa-pen"></i></button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">No courses match. Clear the search or add a course.</td></tr>'};
+const pv=()=>{const v=id=>$('#f-'+id).value,im=up||v('img');$('#pv').innerHTML=`<div class="ph2">${im?`<img src="${asset(im)}" alt="" style="object-fit:${v('fit')};object-position:${v('pos')}">`:`<i class="${esc(v('icon'))}"></i>`}</div><i class="dash"></i><small><i class="${esc(v('icon'))}"></i> ${esc(v('tag'))}</small><h4>${esc(v('title'))||'Course title'}</h4><p>${esc(v('desc'))}</p><span class="meta">${esc(v('meta'))}</span><span class="meta"><b>${esc(v('fee'))||'Fee: call for fees'}</b></span>`};
+const open=c=>{cur=c;up='';$('#dt').textContent=c?'Edit course':'Add course';$('#del').style.display=c?'':'none';const d=c||{c:'web',status:'published',pos:'center',fit:'cover',icon:'fa-solid fa-graduation-cap',img:''};
+for(const k of ['title','c','tag','icon','status','pos','fit','desc','meta','fee','feeNote','duration','level','mode','batch','certification','eligibility'])$('#f-'+k).value=d[k]||'';for(const k of ['topics','outcomes'])$('#f-'+k).value=(Array.isArray(d[k])?d[k]:String(d[k]||'').split('\n')).join('\n');$('#f-alt').value=d.alt||'';
+const s=$('#f-img');if(d.img&&!/^data:/.test(d.img)&&![...s.options].some(o=>o.value===d.img))s.add(new Option(d.img,d.img));s.value=/^data:/.test(d.img)?'':d.img;if(/^data:/.test(d.img))up=d.img;pv();openDr('dr')};
+$('#add').onclick=()=>open(null);$('#q').oninput=e=>{q=e.target.value.toLowerCase();draw()};
+$('#chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;cat=b.dataset.k;$$('#chips button').forEach(x=>x.classList.toggle('on',x===b));draw()};
+$('#rows').onclick=e=>{const b=e.target.closest('[data-e]');if(b)open(L.find(c=>c.id===b.dataset.e))};
+$('#f').oninput=pv;$('#f-up').onchange=async e=>{if(e.target.files[0]){up=await readFile(e.target.files[0]);pv()}};
+$('#save').onclick=()=>{const v=id=>$('#f-'+id).value.trim();if(!v('title')){$('#f-title').focus();return toast('Enter a course title first')}
+const d={id:cur?cur.id:(courseSlug(v('title'))||'c'+Date.now())+(L.some(x=>x.id===courseSlug(v('title')))?'-'+Date.now().toString(36):''),c:v('c'),tag:v('tag'),icon:v('icon'),status:v('status'),img:up||v('img'),pos:v('pos'),fit:v('fit'),alt:v('alt'),title:v('title'),desc:v('desc'),meta:v('meta'),fee:v('fee'),feeNote:v('feeNote'),duration:v('duration'),level:v('level'),mode:v('mode'),batch:v('batch'),certification:v('certification'),eligibility:v('eligibility'),topics:v('topics').split('\n').map(x=>x.trim()).filter(Boolean),outcomes:v('outcomes').split('\n').map(x=>x.trim()).filter(Boolean)};
+cur?L[L.indexOf(cur)]=d:L.push(d);Store.set('courses',L);draw();closeDr();toast('Course saved')};
+$('#del').onclick=()=>{if(cur&&confirm('Delete "'+cur.title+'"? This cannot be undone.')){L=L.filter(c=>c!==cur);Store.set('courses',L);draw();closeDr();toast('Course deleted')}};
+draw();
+/* page text tab (hero and "How it works" steps on courses.html) */
+const CP=load('coursesPage');$('#banner').innerHTML=BANNER();bindB(CP);rep('steps',CP.how.steps,[{k:'t',l:'Step title',w:'w2'},{k:'d',l:'Description',w:'w4'}],{t:'',d:''});
+$$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));$('#list').hidden=b.dataset.t!=='list';$('#text').hidden=b.dataset.t!=='text'});
+$('#saveT').onclick=()=>{Store.set('coursesPage',CP);toast('Courses page text saved')};
+</script></body></html>

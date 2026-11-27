@@ -1,0 +1,11 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in | I-Net Admin</title><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css">
+<style>body{display:grid;grid-template-columns:1fr;place-items:center;padding:20px}.lg{width:min(380px,100%);background:#fff;border:1px solid var(--line);border-radius:12px;padding:32px 28px;box-shadow:0 20px 50px #0001}.lg img{height:44px;width:auto;display:block;margin:0 auto 22px}.lg h1{font-size:1.25rem;text-align:center;margin-bottom:18px}.lg label{display:block;font-weight:600;font-size:.85rem;margin-bottom:14px}.lg input{display:block;width:100%;margin-top:6px;padding:11px 12px;border:1px solid var(--line);border-radius:8px;font:inherit}.lg .btn{width:100%;justify-content:center}#err{color:var(--red);font-size:.85rem;min-height:1.3em;margin-bottom:8px;text-align:center}</style></head>
+<body><form class="lg" id="f"><img src="../assets/logo.png" alt="I-Net Infotech"><h1>Admin sign in</h1>
+<label>Username<input id="u" autocomplete="username" required autofocus></label>
+<label>Password<input id="p" type="password" autocomplete="current-password" required></label>
+<div id="err" role="alert"></div><button class="btn" type="submit">Sign in</button></form>
+<script>
+document.getElementById('f').onsubmit=async e=>{e.preventDefault();const er=document.getElementById('err');er.textContent='';
+try{const r=await fetch('../api/login.php',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:u.value,pass:p.value})});const j=await r.json();
+if(j.ok)location.href='index.html';else er.textContent=j.error||'Could not sign in'}catch(x){er.textContent='Cannot reach the server. Is PHP running?'}};
+</script></body></html>

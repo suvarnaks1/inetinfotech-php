@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Home page | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="home-content.html" data-title="Home page"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET /api/home | PUT /api/home. One JSON object: hero, ticker[], track{a,b,items[]}, logos{title}, cta. Inputs use data-b="hero.l1" paths. -->
+<div class="ph"><div><i class="dash"></i><h2>Home page</h2><p>Edit the text, photos and buttons on the home page, top to bottom. Press Save changes when you are done.</p></div></div>
+<div class="panel"><h3>Top banner</h3><div class="pb split2"><div>
+<div class="g3"><label>Headline word 1<input data-b="hero.l1"></label><label>Headline word 2 <small>(orange)</small><input data-b="hero.l2"></label><label>Headline word 3 <small>(red)</small><input data-b="hero.l3"></label></div>
+<label>Tagline<input data-b="hero.p"></label><div class="g2"><label>Button text<input data-b="hero.btn"></label><label>Button link<input data-b="hero.href"></label></div>
+<div class="g2"><label>Round sticker number<input data-b="hero.years"></label><label>Sticker label<input data-b="hero.yearsLabel"></label></div>
+<div class="g3"><label>Collage photo 1<select data-b="hero.img1" class="media"></select></label><label>Collage photo 2<select data-b="hero.img2" class="media"></select></label><label>Collage photo 3<select data-b="hero.img3" class="media"></select></label></div></div>
+<div class="pv"><p>Live preview</p><div class="gc" style="padding:18px" id="pv"></div></div></div></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">Moving word strip <span class="mut">(scrolls under the banner)</span></span><button class="btn ghost" data-add="ticker" type="button"><i class="fa-solid fa-plus"></i>Add word</button></div><div class="pb"><div id="ticker"></div></div></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">Pick your track <span class="mut">(poster row)</span></span><button class="btn ghost" data-add="track" type="button"><i class="fa-solid fa-plus"></i>Add poster</button></div><div class="pb"><div class="g2"><label>Heading, first line<input data-b="track.a"></label><label>Heading, highlighted word<input data-b="track.b"></label></div><div id="track"></div><p class="hint">Posters are numbered 01, 02, 03 automatically in this order.</p></div></div>
+<div class="panel"><h3>Student faces and certification logos</h3><div class="pb"><label>Certification strip heading<input data-b="logos.title"></label><p class="mut">The moving row of student faces uses the photos from <a href="placements.html"><b>Placements</b></a>, and the logos in the strip come from <a href="certifications.html"><b>Certifications</b></a>.</p></div></div>
+<div class="panel"><h3>Closing banner</h3><div class="pb"><div class="g2"><label>Heading, first line<input data-b="cta.a"></label><label>Heading, second line<input data-b="cta.b"></label></div><div class="g2"><label>Button text<input data-b="cta.btn"></label><label>Button link<input data-b="cta.href"></label></div><p class="mut">The phone number next to the button is set under <a href="contact.html"><b>Contact &amp; footer</b></a>.</p></div></div>
+<div class="savebar"><button class="btn" id="save">Save changes</button></div>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="js/admin.js"></script>
+<script>
+const H=load('home');
+$$('select.media').forEach(s=>s.innerHTML=SEED.media.map(m=>`<option>${m}</option>`).join(''));
+const pv=()=>$('#pv').innerHTML=`<i class="dash" style="margin:0 0 12px"></i><h4 style="padding:0;font-size:1.5rem;margin:0 0 8px">${esc(H.hero.l1)} <span style="color:var(--org)">${esc(H.hero.l2)}</span> <span style="color:var(--red)">${esc(H.hero.l3)}</span></h4><p style="padding:0">${esc(H.hero.p)}</p><span class="meta"><b>${esc(H.hero.btn)}</b> · ${esc(H.hero.years)} ${esc(H.hero.yearsLabel)}</span>`;
+bindB(H,pv);pv();
+rep('ticker',H.ticker,[{k:'w',l:'Word'}],{w:''});
+rep('track',H.track.items,[{k:'label',l:'Label',w:'w2'},{k:'img',l:'Photo',w:'w2',o:SEED.media},{k:'pos',l:'Photo focus <small>(e.g. center 20%)</small>',w:'w2'},{k:'alt',l:'Alt text',w:'w3'},{k:'href',l:'Link',w:'w3'}],{label:'',img:SEED.media[0],pos:'center',alt:'',href:'courses.html'});
+$('#save').onclick=()=>{Store.set('home',H);toast('Home page saved')};
+</script></body></html>

@@ -1,0 +1,4 @@
+# these two files are only included by other PHP files, never opened directly
+<FilesMatch "^(config|db)\.php$">
+  Require all denied
+</FilesMatch>

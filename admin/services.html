@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Services | I-Net Admin</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="icon" href="../assets/logo2.png"><link rel="stylesheet" href="css/admin.css"><script src="../api/boot.php?admin=1"></script></head><body data-page="services.html" data-title="Services"><aside id="side"></aside><div class="main"><header id="top"></header><main class="content">
+<!-- API: GET /api/services | PUT /api/services. JSON: hero, how{title,p,steps[]}, list[] with id, icon, name, short, title, desc, pts[], fit, course, href. List order = tab order on the site. -->
+<div class="ph"><div><i class="dash"></i><h2>Services</h2><p>The services shown on the Services page, plus the “How we work” steps. Use the arrows to change the order.</p></div><button class="btn" id="add"><i class="fa-solid fa-plus"></i>Add service</button></div>
+<div class="panel tw"><table class="rt"><thead><tr><th>Icon</th><th>Service</th><th>Summary</th><th></th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+<div id="banner"></div>
+<div class="panel"><div class="phd"><span style="font-weight:700">“How we work” steps</span><button class="btn ghost" data-add="steps" type="button"><i class="fa-solid fa-plus"></i>Add step</button></div><div class="pb"><div class="g2"><label>Heading<input data-b="how.title"></label><label>Sub text<input data-b="how.p"></label></div><div id="steps"></div></div></div>
+<div class="savebar"><button class="btn" id="saveP">Save page text</button></div>
+<aside class="dr" id="dr" aria-label="Service form"><header><h3 id="dt">Add service</h3><button class="ib" data-close aria-label="Close"><i class="fa-solid fa-xmark"></i></button></header>
+<div class="bd2"><form id="f" onsubmit="return false"><label>Service name <small>(tab title)</small><input id="f-name" required></label>
+<div class="g2"><label>Icon <small>(Font Awesome class)</small><input id="f-icon" placeholder="fa-solid fa-code"></label><label>Short summary <small>(under the tab title)</small><input id="f-short"></label></div>
+<label>Panel heading<input id="f-title"></label><label>Intro<textarea id="f-desc" rows="3"></textarea></label>
+<label>What is included <small>(one point per line)</small><textarea id="f-pts" rows="6"></textarea></label>
+<label>“Best for” line <small>(start with “Best for”)</small><input id="f-fit"></label>
+<div class="g2"><label>Link text<input id="f-course" placeholder="e.g. Cisco and Red Hat training"></label><label>Link address <small>(empty opens Courses)</small><input id="f-href" placeholder="courses.html"></label></div></form>
+<div class="pv"><p>Preview of the panel</p><div class="gc" id="pv" style="padding:18px"></div></div></div>
+<footer><button class="btn danger" id="del" type="button">Delete</button><span><button class="btn ghost" data-close type="button">Cancel</button> <button class="btn" id="save" type="button">Save service</button></span></footer></aside>
+</main></div><script src="js/seed.js"></script><script src="js/content.js"></script><script src="js/admin.js"></script>
+<script>
+const S=load('services');let L=S.list,cur=null;$('#banner').innerHTML=BANNER();bindB(S);rep('steps',S.how.steps,[{k:'t',l:'Step title',w:'w2'},{k:'d',l:'Description',w:'w4'}],{t:'',d:''});
+const slug=t=>t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const draw=()=>{$('#rows').innerHTML=L.map((c,i)=>`<tr><td class="c-img"><span class="th"><i class="${esc(c.icon)}"></i></span></td><td class="c-main"><b>${esc(c.name)}</b></td><td class="c-cat">${esc(c.short)}</td><td class="c-st"></td><td class="act"><span class="ord"><button class="ib" data-m="-1" data-i="${i}" aria-label="Move ${esc(c.name)} up"${i===0?' disabled':''}><i class="fa-solid fa-arrow-up"></i></button><button class="ib" data-m="1" data-i="${i}" aria-label="Move ${esc(c.name)} down"${i===L.length-1?' disabled':''}><i class="fa-solid fa-arrow-down"></i></button><button class="ib" data-e="${i}" aria-label="Edit ${esc(c.name)}"><i class="fa-solid fa-pen"></i></button></span></td></tr>`).join('')||'<tr><td colspan="5" class="empty">No services yet. Add the first one.</td></tr>'};
+const pv=()=>{const v=k=>$('#f-'+k).value;$('#pv').innerHTML=`<i class="dash" style="margin:0 0 12px"></i><small style="padding:0"><i class="${esc(v('icon'))}"></i> ${esc(v('name'))}</small><h4 style="padding:0;margin:6px 0">${esc(v('title'))||'Panel heading'}</h4><p style="padding:0">${esc(v('desc'))}</p><p style="padding:6px 0 0">${v('pts').split('\n').filter(Boolean).map(x=>'• '+esc(x)).join('<br>')}</p><p style="padding:6px 0 0"><b>${esc(v('fit'))}</b></p>`};
+const open=i=>{cur=i;const d=i==null?{icon:'fa-solid fa-gear',pts:[]}:L[i];$('#dt').textContent=i==null?'Add service':'Edit service';$('#del').style.display=i==null?'none':'';
+for(const k of ['name','icon','short','title','desc','fit','course','href'])$('#f-'+k).value=d[k]||'';$('#f-pts').value=(d.pts||[]).join('\n');pv();openDr('dr')};
+$('#add').onclick=()=>open(null);$('#f').oninput=pv;
+$('#rows').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;if(b.dataset.e!=null)return open(+b.dataset.e);const i=+b.dataset.i,j=i+ +b.dataset.m;[L[i],L[j]]=[L[j],L[i]];Store.set('services',S);draw();toast('Order saved')};
+$('#save').onclick=()=>{const v=k=>$('#f-'+k).value.trim();if(!v('name')){$('#f-name').focus();return toast('Enter a service name first')}
+const d={id:cur!=null?L[cur].id:(slug(v('name'))||'s'+Date.now()),icon:v('icon')||'fa-solid fa-gear',name:v('name'),short:v('short'),title:v('title'),desc:v('desc'),pts:v('pts').split('\n').map(x=>x.trim()).filter(Boolean),fit:v('fit'),course:v('course'),href:v('href')};
+cur!=null?L[cur]=d:L.push(d);Store.set('services',S);draw();closeDr();toast('Service saved')};
+$('#del').onclick=()=>{if(cur!=null&&confirm('Delete "'+L[cur].name+'"? This cannot be undone.')){L.splice(cur,1);Store.set('services',S);draw();closeDr();toast('Service deleted')}};
+$('#saveP').onclick=()=>{Store.set('services',S);toast('Services page saved')};
+draw();
+</script></body></html>
